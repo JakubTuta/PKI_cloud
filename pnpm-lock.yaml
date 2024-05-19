@@ -8,16 +8,15 @@ importers:
 
   .:
     dependencies:
-      vue:
-        specifier: ^3.4.21
-        version: 3.4.27
-    devDependencies:
       '@vitejs/plugin-vue':
         specifier: ^5.0.4
         version: 5.0.4(vite@5.2.11)(vue@3.4.27)
       vite:
         specifier: ^5.2.8
         version: 5.2.11
+      vue:
+        specifier: ^3.4.21
+        version: 3.4.27
 
 packages:
 
