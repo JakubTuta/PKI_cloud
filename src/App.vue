@@ -1,12 +1,29 @@
 <script setup>
 import { ref } from 'vue'
 import { auth } from '@/firebase'
-import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from 'firebase/auth'
+import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, FacebookAuthProvider } from 'firebase/auth'
 
 const user = ref(null)
 
-function login() {
+function loginGoogle() {
   const provider = new GoogleAuthProvider()
+  provider.setCustomParameters({
+    prompt: "select_account"
+  })
+
+  const onSuccess = (response) => {
+    console.log(response)
+  }
+
+  const onError = (error) => {
+    console.log(error)
+  }
+
+  signInWithPopup(auth, provider).then(onSuccess).catch(onError)
+}
+
+function loginFacebook() {
+  const provider = new FacebookAuthProvider()
   provider.setCustomParameters({
     prompt: "select_account"
   })
@@ -53,9 +70,17 @@ onAuthStateChanged(auth, currentUser => {
 
   <br>
 
-  <button v-if="!user" @click="login">
-    Zaloguj się za pomocą Google
-  </button>
+  <div v-if="!user">
+    <button @click="loginGoogle">
+      Zaloguj się za pomocą Google
+    </button>
+
+    <br>
+
+    <button v-if="!user" @click="loginFacebook">
+      Zaloguj się za pomocą Facebooka
+    </button>
+  </div>
 
   <button v-if="user" @click="logout">
     Wyloguj się
