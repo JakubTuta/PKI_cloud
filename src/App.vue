@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { auth, firestore } from '@/firebase'
 import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, FacebookAuthProvider, GithubAuthProvider } from 'firebase/auth'
-import { collection, getDocs } from "firebase/firestore"
+import { collection, getDocs, query, where, updateDoc, addDoc } from "firebase/firestore"
 
 const user = ref(null)
 const users = ref([])
@@ -72,16 +72,64 @@ function logout() {
     .catch(onError)
 }
 
+async function checkIfUserExists() {
+  const userId = user.value?.uid || ''
+
+  const querySnapshot = await getDocs(query(collection(firestore, "users"), where('id', '==', userId)))
+
+  if (querySnapshot.docs.length > 0)
+    return querySnapshot.docs.map(user => {
+      return {
+        ref: user.ref,
+        ...user.data()
+      }
+    })[0]
+
+  return null
+}
+
+async function increaseCounter(dbUser) {
+  console.log(dbUser)
+  await updateDoc(dbUser.ref, {
+    counter: dbUser.counter + 1,
+    lastVisit: new Date()
+  })
+}
+
+async function addUserToDatabase() {
+  await addDoc(collection(firestore, "users"), {
+    id: user.value?.uid || '',
+    name: user.value?.displayName || '',
+    joined: new Date(),
+    lastVisit: new Date(),
+    counter: 1,
+  })
+}
+
 async function getAllUsers() {
   const querySnapshot = await getDocs(collection(firestore, "users"))
 
-  users.value = querySnapshot.docs.map(user => user.data())
+  users.value = querySnapshot.docs.map(user => {
+    return {
+      ref: user.ref,
+      ...user.data()
+    }
+  })
 }
 
-onAuthStateChanged(auth, currentUser => {
+onAuthStateChanged(auth, async currentUser => {
   if (currentUser) {
     console.log("logged in")
     user.value = currentUser
+
+    const dbUser = await checkIfUserExists()
+
+    if (dbUser) {
+      await increaseCounter(dbUser)
+    }
+    else {
+      await addUserToDatabase()
+    }
 
     getAllUsers()
   }
