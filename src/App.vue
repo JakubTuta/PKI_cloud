@@ -1,9 +1,11 @@
 <script setup>
 import { ref } from 'vue'
-import { auth } from '@/firebase'
+import { auth, firestore } from '@/firebase'
 import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, FacebookAuthProvider, GithubAuthProvider } from 'firebase/auth'
+import { collection, getDocs } from "firebase/firestore"
 
 const user = ref(null)
+const users = ref([])
 
 function loginGoogle() {
   const provider = new GoogleAuthProvider()
@@ -70,16 +72,28 @@ function logout() {
     .catch(onError)
 }
 
+async function getAllUsers() {
+  const querySnapshot = await getDocs(collection(firestore, "users"))
+
+  users.value = querySnapshot.docs.map(user => user.data())
+}
+
 onAuthStateChanged(auth, currentUser => {
   if (currentUser) {
     console.log("logged in")
     user.value = currentUser
+
+    getAllUsers()
   }
   else if (user.value && !currentUser) {
     console.log("logged out")
     user.value = null
   }
 })
+
+function mapTimestamp(data) {
+  return new Date(data.toDate())
+}
 </script>
 
 <template>
@@ -114,4 +128,27 @@ onAuthStateChanged(auth, currentUser => {
   <span v-if="user">
     {{ user.displayName }}
   </span>
+
+  <br>
+
+  <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Joined</th>
+          <th>Last Visit</th>
+          <th>Counter</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="item in users" :key="item.id">
+          <td>{{ item.id }}</td>
+          <td>{{ item.name }}</td>
+          <td>{{ mapTimestamp(item.joined) }}</td>
+          <td>{{ mapTimestamp(item.lastVisit) }}</td>
+          <td>{{ item.counter }}</td>
+        </tr>
+      </tbody>
+    </table>
 </template>
