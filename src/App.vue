@@ -140,46 +140,39 @@ onAuthStateChanged(auth, async currentUser => {
 })
 
 function mapTimestamp(data) {
-  return new Date(data.toDate())
+  const date = data.toDate()
+
+  const day = date.getDate().toString().padStart(2, '0')
+  const month = (date.getMonth() + 1).toString().padStart(2, '0')
+  const year = date.getFullYear().toString()
+  const hours = date.getHours().toString().padStart(2, '0')
+  const minutes = date.getMinutes().toString().padStart(2, '0')
+
+  return `${day}.${month}.${year} ${hours}:${minutes}`
 }
 </script>
 
 <template>
-  Hello world
+  <nav class="navbar">
+      <div class="navbar-container">
+        <div class="navbar-left" v-if="user">
+          <span class="navbar-item">Username: {{ user.displayName }}</span>
+        </div>
 
-  <br>
+        <div class="navbar-right">
+          <button v-if="user" class="navbar-item" @click="logout">Wyloguj się</button>
+          
+          <div v-else>
+            <button class="navbar-item" @click="loginGoogle">Zaloguj się za pomocą Google</button>
+            <button class="navbar-item" @click="loginFacebook">Zaloguj się za pomocą Facebooka</button>
+            <button class="navbar-item" @click="loginGithub">Zaloguj się za pomocą Githuba</button>
+          </div>
+        </div>
+      </div>
+    </nav>
 
-  <div v-if="!user">
-    <button @click="loginGoogle">
-      Zaloguj się za pomocą Google
-    </button>
-
-    <br>
-
-    <button v-if="!user" @click="loginFacebook">
-      Zaloguj się za pomocą Facebooka
-    </button>
-
-    <br>
-
-    <button v-if="!user" @click="loginGithub">
-      Zaloguj się za pomocą Githuba
-    </button>
-  </div>
-
-  <button v-if="user" @click="logout">
-    Wyloguj się
-  </button>
-
-  <br>
-
-  <span v-if="user">
-    {{ user.displayName }}
-  </span>
-
-  <br>
-
-  <table>
+  <div class="content" v-if="user">
+    <table>
       <thead>
         <tr>
           <th>ID</th>
@@ -199,4 +192,73 @@ function mapTimestamp(data) {
         </tr>
       </tbody>
     </table>
+  </div>
 </template>
+
+<style scoped>
+body, html, #app {
+  margin: 0;
+  padding: 0;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  border: 1px solid #000;
+  padding: 8px;
+  text-align: left;
+}
+
+th {
+  background-color: #f2f2f2;
+}
+
+.content {
+  padding-top: 60px;
+}
+
+.navbar {
+  background-color: #333;
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+  height: 30px;
+}
+
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  width: 95%;
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-item {
+  color: #fff;
+  margin: 0 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+
+.navbar-item:hover {
+  background-color: #575757;
+}
+</style>
