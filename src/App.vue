@@ -6,6 +6,8 @@ import { collection, getDocs, query, where, updateDoc, addDoc } from "firebase/f
 
 const user = ref(null)
 const users = ref([])
+const isShowPopup = ref(false)
+const popupText = ref('')
 
 function loginGoogle() {
   const provider = new GoogleAuthProvider()
@@ -13,8 +15,8 @@ function loginGoogle() {
     prompt: "select_account"
   })
 
-  const onSuccess = (response) => {
-    console.log(response)
+  const onSuccess = () => {
+    showPopup("Udało się zalogować")
   }
 
   const onError = (error) => {
@@ -30,8 +32,8 @@ function loginFacebook() {
     prompt: "select_account"
   })
 
-  const onSuccess = (response) => {
-    console.log(response)
+  const onSuccess = () => {
+    showPopup("Udało się zalogować")
   }
 
   const onError = (error) => {
@@ -47,8 +49,8 @@ function loginGithub() {
     prompt: "select_account"
   })
 
-  const onSuccess = (response) => {
-    console.log(response)
+  const onSuccess = () => {
+    showPopup("Udało się zalogować")
   }
 
   const onError = (error) => {
@@ -61,6 +63,8 @@ function loginGithub() {
 function logout() {
   const onSuccess = () => {
     user.value = null
+
+    showPopup("Wylogowano się")
   }
 
   const onError = (error) => {
@@ -89,7 +93,6 @@ async function checkIfUserExists() {
 }
 
 async function increaseCounter(dbUser) {
-  console.log(dbUser)
   await updateDoc(dbUser.ref, {
     counter: dbUser.counter + 1,
     lastVisit: new Date()
@@ -119,7 +122,6 @@ async function getAllUsers() {
 
 onAuthStateChanged(auth, async currentUser => {
   if (currentUser) {
-    console.log("logged in")
     user.value = currentUser
 
     const dbUser = await checkIfUserExists()
@@ -134,7 +136,6 @@ onAuthStateChanged(auth, async currentUser => {
     getAllUsers()
   }
   else if (user.value && !currentUser) {
-    console.log("logged out")
     user.value = null
   }
 })
@@ -149,6 +150,20 @@ function mapTimestamp(data) {
   const minutes = date.getMinutes().toString().padStart(2, '0')
 
   return `${day}.${month}.${year} ${hours}:${minutes}`
+}
+
+function showPopup(text) {
+  isShowPopup.value = true
+  popupText.value = text
+
+  setTimeout(() => {
+    closePopup()
+  }, 3 * 1000)
+}
+
+function closePopup() {
+  isShowPopup.value = false
+  popupText.value = ''
 }
 </script>
 
@@ -192,6 +207,13 @@ function mapTimestamp(data) {
         </tr>
       </tbody>
     </table>
+  </div>
+
+  <div v-if="isShowPopup" class="popup-overlay">
+    <div class="popup-content">
+      <button @click="closePopup" class="close-button">×</button>
+      <div class="popup-text">{{ popupText }}</div>
+    </div>
   </div>
 </template>
 
@@ -260,5 +282,46 @@ th {
 
 .navbar-item:hover {
   background-color: #575757;
+}
+
+.popup-overlay {
+  position: fixed;
+  left: 0;
+  width: 100%;
+  height: auto;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.popup-content {
+  background-color: #fff;
+  width: 100%;
+  max-width: 500px;
+  padding: 20px;
+  border-radius: 10px 10px 0 0;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  color: #888;
+}
+
+.popup-text {
+  margin-top: auto;
+  padding-top: 20px;
+  text-align: center;
 }
 </style>
