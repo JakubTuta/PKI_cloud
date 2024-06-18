@@ -3,7 +3,6 @@ import { DocumentData, DocumentReference, Timestamp } from "firebase/firestore"
 export type TStatus = "planned" | "in-progress" | "finished"
 
 export interface IMatch {
-    id: string
     date: Date | Timestamp
     teamA: DocumentReference
     teamB: DocumentReference
@@ -12,12 +11,11 @@ export interface IMatch {
         resD: string[],
         timeout: string[]
     }
-    timestamp: Date | Timestamp
+    timeline: null
     status: TStatus
 }
 
 export class MatchModel implements IMatch {
-    id: string
     date: Date | Timestamp
     teamA: DocumentReference
     teamB: DocumentReference
@@ -26,19 +24,18 @@ export class MatchModel implements IMatch {
         resD: string[],
         timeout: string[]
     }
-    timestamp: Date | Timestamp
+    timeline: null
     status: TStatus
 
     reference: DocumentReference
 
     constructor(match: IMatch, reference: DocumentReference) {
-        this.id = match.id
         this.date = match.date
         this.teamA = match.teamA
         this.teamB = match.teamB
         this.result = match.result
         this.resultDetailed = match.resultDetailed
-        this.timestamp = match.timestamp
+        this.timeline = match.timeline
         this.status = match.status
 
         this.reference = reference
@@ -46,13 +43,12 @@ export class MatchModel implements IMatch {
 
     toMap() {
         return {
-            id: this.id,
             date: this.date,
             teamA: this.teamA,
             teamB: this.teamB,
             result: this.result,
             resultDetailed: this.resultDetailed,
-            timestamp: this.timestamp,
+            timeline: this.timeline,
             status: this.status
         }
     }
