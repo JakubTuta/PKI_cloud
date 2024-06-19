@@ -1,73 +1,51 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { auth } from './firebase'
-import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, FacebookAuthProvider, GithubAuthProvider, User } from 'firebase/auth'
-
-const user = ref<User | null>(null)
-
-function loginGoogle() {
-  const provider = new GoogleAuthProvider()
-  provider.setCustomParameters({
-    prompt: "select_account"
-  })
-
-  const onError = (error: any) => {
-    console.log(error)
-  }
-
-  signInWithPopup(auth, provider).catch(onError)
-}
-
-function loginFacebook() {
-  const provider = new FacebookAuthProvider()
-  provider.setCustomParameters({
-    prompt: "select_account"
-  })
-
-  const onError = (error: any) => {
-    console.log(error)
-  }
-
-  signInWithPopup(auth, provider).catch(onError)
-}
-
-function loginGithub() {
-  const provider = new GithubAuthProvider()
-  provider.setCustomParameters({
-    prompt: "select_account"
-  })
-
-  const onError = (error: any) => {
-    console.log(error)
-  }
-
-  signInWithPopup(auth, provider).catch(onError)
-}
-
-function logout() {
-  const onSuccess = () => {
-    user.value = null
-  }
-
-  const onError = (error: any) => {
-    console.log(error)
-  }
-
-  signOut(auth)
-    .then(onSuccess)
-    .catch(onError)
-}
-
-
-onAuthStateChanged(auth, async currentUser => {
-  if (currentUser) {
-    user.value = currentUser
-  }
-  else if (user.value && !currentUser) {
-    user.value = null
-  }
-})
+import { loginFacebook, loginGithub, loginGoogle, logout, user } from './firebase_functions'
+import LoggedUserView from './LoggedUserView.vue'
+import NotLoggedUserView from './NotLoggedUserView.vue'
 </script>
 
 <template>
+  <v-app>
+    <v-main>
+      <v-container>
+        <v-card>
+          <v-card-title>
+            <v-btn
+              v-if="!user"
+              @click="loginGoogle"
+            >
+              Login with Google
+            </v-btn>
+
+            <v-btn
+              v-if="!user"
+              @click="loginFacebook"
+            >
+              Login with Facebook
+            </v-btn>
+
+            <v-btn
+              v-if="!user"
+              @click="loginGithub"
+            >
+              Login with Github
+            </v-btn>
+
+            <v-btn
+              v-if="user"
+              @click="logout"
+            >
+              Logout
+            </v-btn>
+          </v-card-title>
+
+          <v-card-text>
+            <LoggedUserView v-if="user" />
+
+            <NotLoggedUserView v-else />
+          </v-card-text>
+        </v-card>
+      </v-container>
+    </v-main>
+  </v-app>
 </template>
