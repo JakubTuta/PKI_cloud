@@ -3,32 +3,20 @@ import type { User } from 'firebase/auth'
 import { FacebookAuthProvider, GithubAuthProvider, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth'
 import { collection, getDocs, orderBy, query } from 'firebase/firestore'
 import { auth, firestore } from './firebase'
-import type { IMatch } from './models/match'
 import { createMatch } from './models/match'
-import type { ITeam } from './models/team'
 import { createTeam } from './models/team'
 
 export const user = ref<User | null>(null)
-export const matches = ref<IMatch[]>([])
-export const teams = ref<ITeam[]>([])
 
 const collectionMatches = collection(firestore, 'matches')
 
-function setValues(currentUser: User) {
-  user.value = currentUser
-  getMatches()
-  getTeams()
-}
-
 function reset() {
   user.value = null
-  matches.value = []
-  teams.value = []
 }
 
 onAuthStateChanged(auth, (currentUser) => {
   if (currentUser)
-    setValues(currentUser)
+    user.value = currentUser
 
   else if (user.value && !currentUser)
     reset()
@@ -87,32 +75,36 @@ export function logout() {
     .catch(onError)
 }
 
-async function getMatches() {
+export async function getMatches() {
   const matchesQuery = query(collectionMatches, orderBy('date', 'desc'))
 
   try {
     const docs = await getDocs(matchesQuery)
 
-    matches.value = docs.docs.map(createMatch)
+    const matches = docs.docs.map(createMatch)
+
+    return matches
   }
   catch (error) {
     console.error(error)
 
-    matches.value = []
+    return []
   }
 }
 
-async function getTeams() {
+export async function getTeams() {
   const teamsQuery = query(collectionMatches, orderBy('date', 'desc'))
 
   try {
     const docs = await getDocs(teamsQuery)
 
-    teams.value = docs.docs.map(createTeam)
+    const teams = docs.docs.map(createTeam)
+
+    return teams
   }
   catch (error) {
     console.error(error)
 
-    teams.value = []
+    return []
   }
 }

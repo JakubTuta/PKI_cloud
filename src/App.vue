@@ -9,7 +9,7 @@ import NotLoggedUserView from './NotLoggedUserView.vue'
     <v-main>
       <v-container>
         <v-card>
-          <v-card-title>
+          <v-card-title class="mb-5">
             <v-btn
               v-if="!user"
               @click="loginGoogle"
