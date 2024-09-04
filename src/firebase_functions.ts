@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import type { User } from 'firebase/auth'
 import { FacebookAuthProvider, GithubAuthProvider, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth'
-import { collection, getDocs, orderBy, query } from 'firebase/firestore'
+import { collection, doc, getDoc, getDocs, orderBy, query } from 'firebase/firestore'
 import { auth, firestore } from './firebase'
 import { createMatch } from './models/match'
 import { createTeam } from './models/team'
@@ -9,6 +9,7 @@ import { createTeam } from './models/team'
 export const user = ref<User | null>(null)
 
 const collectionMatches = collection(firestore, 'matches')
+const collectionTeams = collection(firestore, 'teams')
 
 function reset() {
   user.value = null
@@ -92,8 +93,21 @@ export async function getMatches() {
   }
 }
 
+export async function getMatch(id: string) {
+  try {
+    const response = await getDoc(doc(collectionMatches, id))
+
+    return createMatch(response)
+  }
+  catch (error) {
+    console.error(error)
+
+    return null
+  }
+}
+
 export async function getTeams() {
-  const teamsQuery = query(collectionMatches, orderBy('date', 'desc'))
+  const teamsQuery = query(collectionTeams)
 
   try {
     const docs = await getDocs(teamsQuery)
