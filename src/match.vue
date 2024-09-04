@@ -4,7 +4,7 @@ import { useRoute } from 'vue-router'
 import { getMatch, getTeams } from './firebase_functions'
 import type { MatchModel } from './models/match'
 import router from './router'
-import { TeamModel } from './models/team'
+import type { TeamModel } from './models/team'
 
 const route = useRoute()
 
@@ -25,7 +25,10 @@ function findTeam(teamId: string) {
 
 <template>
   <v-container>
-    <v-btn @click="router.go(-1)" class="my-3">
+    <v-btn
+      class="my-3"
+      @click="router.go(-1)"
+    >
       Powrót
     </v-btn>
 

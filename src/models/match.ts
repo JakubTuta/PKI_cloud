@@ -3,7 +3,7 @@ import type { DocumentData, DocumentReference, Timestamp } from 'firebase/firest
 export type TStatus = 'planned' | 'in-progress' | 'finished'
 
 export interface IMatch {
-  date: Date | Timestamp
+  date: Timestamp
   teamA: DocumentReference
   teamB: DocumentReference
   result: string
@@ -11,12 +11,11 @@ export interface IMatch {
     resD: string[]
     timeout: string[]
   }
-  timeline: null
   status: TStatus
 }
 
 export class MatchModel implements IMatch {
-  date: Date | Timestamp
+  date: Timestamp
   teamA: DocumentReference
   teamB: DocumentReference
   result: string
@@ -25,7 +24,6 @@ export class MatchModel implements IMatch {
     timeout: string[]
   }
 
-  timeline: null
   status: TStatus
 
   reference: DocumentReference
@@ -36,7 +34,6 @@ export class MatchModel implements IMatch {
     this.teamB = match.teamB
     this.result = match.result
     this.resultDetailed = match.resultDetailed
-    this.timeline = match.timeline
     this.status = match.status
 
     this.reference = reference
@@ -49,7 +46,6 @@ export class MatchModel implements IMatch {
       teamB: this.teamB,
       result: this.result,
       resultDetailed: this.resultDetailed,
-      timeline: this.timeline,
       status: this.status,
     }
   }

@@ -3,8 +3,6 @@
     "*.css": "postcss"
   },
 
-  "eslint.experimental.useFlatConfig": true,
-
   "prettier.enable": false,
   "editor.formatOnSave": false,
 
