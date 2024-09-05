@@ -8,33 +8,46 @@ import NotLoggedUserView from './NotLoggedUserView.vue'
   <v-container>
     <v-card>
       <v-card-title class="mb-5">
-        <v-btn
-          v-if="!user"
-          @click="loginGoogle"
-        >
-          Logowanie Google
-        </v-btn>
+        <v-row>
+          <v-col cols="4">
+            <v-btn
+              v-if="!user"
+              block
+              @click="loginGoogle"
+            >
+              Logowanie Google
+            </v-btn>
+          </v-col>
 
-        <v-btn
-          v-if="!user"
-          @click="loginFacebook"
-        >
-          Logowanie Facebook
-        </v-btn>
+          <v-col cols="4">
+            <v-btn
+              v-if="!user"
+              block
+              @click="loginFacebook"
+            >
+              Logowanie Facebook
+            </v-btn>
+          </v-col>
 
-        <v-btn
-          v-if="!user"
-          @click="loginGithub"
-        >
-          Logowanie Github
-        </v-btn>
+          <v-col cols="4">
+            <v-btn
+              v-if="!user"
+              block
+              @click="loginGithub"
+            >
+              Logowanie Github
+            </v-btn>
+          </v-col>
 
-        <v-btn
-          v-if="user"
-          @click="logout"
-        >
-          Wyloguj się
-        </v-btn>
+          <v-col cols="4">
+            <v-btn
+              v-if="user"
+              @click="logout"
+            >
+              Wyloguj się
+            </v-btn>
+          </v-col>
+        </v-row>
       </v-card-title>
 
       <v-card-text>

@@ -7,11 +7,11 @@ export interface IMatch {
   teamA: DocumentReference
   teamB: DocumentReference
   result: string
+  status: TStatus
   resultDetailed: {
     resD: string[]
     timeout: string[]
   }
-  status: TStatus
 }
 
 export class MatchModel implements IMatch {
@@ -19,16 +19,15 @@ export class MatchModel implements IMatch {
   teamA: DocumentReference
   teamB: DocumentReference
   result: string
+  status: TStatus
   resultDetailed: {
     resD: string[]
     timeout: string[]
   }
 
-  status: TStatus
+  reference: DocumentReference | null
 
-  reference: DocumentReference
-
-  constructor(match: IMatch, reference: DocumentReference) {
+  constructor(match: IMatch, reference: DocumentReference | null) {
     this.date = match.date
     this.teamA = match.teamA
     this.teamB = match.teamB
@@ -51,6 +50,6 @@ export class MatchModel implements IMatch {
   }
 }
 
-export function createMatch(match: DocumentData) {
+export function mapMatch(match: DocumentData) {
   return new MatchModel(match.data() as IMatch, match.ref)
 }

@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import type { Timestamp } from 'firebase/firestore'
-import { mdiContentCopy } from '@mdi/js'
-import { getMatches, getTeams } from './firebase_functions'
+import { mdiContentCopy, mdiDelete } from '@mdi/js'
+import { createMatch as firebaseCreateMatch, deleteMatch as firebaseDeleteMatch, getMatches, getTeams } from './firebase_functions'
 import type { MatchModel } from './models/match'
 import type { TeamModel } from './models/team'
 import router from './router'
+import CreateMatch from './CreateMatch.vue'
 
 const matches = ref<MatchModel[]>([])
 const teams = ref<TeamModel[]>([])
 const selectedStatus = ref<string | null>(null)
+const isShowCreateMatchDialog = ref(false)
+const isShowCreateTeamDialog = ref(false)
 
 const statuses = [
   {
@@ -33,9 +36,10 @@ onMounted(async () => {
 
 const currentMatches = computed(() => {
   if (!selectedStatus.value)
-    return matches.value
+    // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+    return matches.value.sort((a, b) => b.date.seconds - a.date.seconds)
 
-  return matches.value.filter(match => match.status === selectedStatus.value)
+  return matches.value.filter(match => match.status === selectedStatus.value).sort((a, b) => b.date.seconds - a.date.seconds)
 })
 
 function findTeam(teamId: string) {
@@ -43,7 +47,7 @@ function findTeam(teamId: string) {
 }
 
 function goToMatch(match: MatchModel) {
-  router.push(`/match/${match.reference.id}`)
+  router.push(`/match/${match.reference?.id || ''}`)
 }
 
 function formatDate(date: Timestamp) {
@@ -144,9 +148,50 @@ function copyMatch(match: MatchModel) {
 
   navigator.clipboard.writeText(matchData)
 }
+
+function deleteMatch(match: MatchModel) {
+  matches.value = matches.value.filter(m => m.reference?.id !== match.reference?.id)
+
+  firebaseDeleteMatch(match)
+}
+
+function toggleCreateMatchDialog() {
+  isShowCreateMatchDialog.value = !isShowCreateMatchDialog.value
+}
+
+async function createNewMatch(match: MatchModel) {
+  const matchWithRef = await firebaseCreateMatch(match)
+
+  if (matchWithRef)
+    matches.value.push(matchWithRef)
+}
+
+function toggleCreateTeamDialog() {
+  isShowCreateTeamDialog.value = !isShowCreateTeamDialog.value
+}
 </script>
 
 <template>
+  <v-row class="mb-4">
+    <v-col cols="4">
+      <v-btn
+        block
+        @click="toggleCreateMatchDialog"
+      >
+        Dodaj nowy mecz
+      </v-btn>
+    </v-col>
+
+    <v-col cols="4">
+      <v-btn
+        block
+        @click="toggleCreateTeamDialog"
+      >
+        Dodaj nową drużynę
+      </v-btn>
+    </v-col>
+  </v-row>
+
   <v-select
     v-model="selectedStatus"
     :items="statuses"
@@ -160,7 +205,7 @@ function copyMatch(match: MatchModel) {
   >
     <v-list-item
       v-for="match in currentMatches"
-      :key="match.reference.id"
+      :key="match.reference?.id || ''"
       class="my-2"
       @click="goToMatch(match)"
     >
@@ -186,7 +231,24 @@ function copyMatch(match: MatchModel) {
           variant="flat"
           @click.stop="copyMatch(match)"
         />
+
+        <v-btn
+          variant="flat"
+          :icon="mdiDelete"
+          @click.stop="deleteMatch(match)"
+        >
+          <v-icon
+            color="red"
+            :icon="mdiDelete"
+          />
+        </v-btn>
       </template>
     </v-list-item>
   </v-list>
+
+  <CreateMatch
+    v-model:is-show="isShowCreateMatchDialog"
+    :teams="teams"
+    @save="createNewMatch"
+  />
 </template>

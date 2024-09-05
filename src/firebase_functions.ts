@@ -1,9 +1,10 @@
 import { ref } from 'vue'
 import type { User } from 'firebase/auth'
 import { FacebookAuthProvider, GithubAuthProvider, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth'
-import { collection, doc, getDoc, getDocs, orderBy, query } from 'firebase/firestore'
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, orderBy, query } from 'firebase/firestore'
 import { auth, firestore } from './firebase'
-import { createMatch } from './models/match'
+import type { MatchModel } from './models/match'
+import { mapMatch } from './models/match'
 import { createTeam } from './models/team'
 
 export const user = ref<User | null>(null)
@@ -82,7 +83,7 @@ export async function getMatches() {
   try {
     const docs = await getDocs(matchesQuery)
 
-    const matches = docs.docs.map(createMatch)
+    const matches = docs.docs.map(mapMatch)
 
     return matches
   }
@@ -97,7 +98,7 @@ export async function getMatch(id: string) {
   try {
     const response = await getDoc(doc(collectionMatches, id))
 
-    return createMatch(response)
+    return mapMatch(response)
   }
   catch (error) {
     console.error(error)
@@ -120,5 +121,31 @@ export async function getTeams() {
     console.error(error)
 
     return []
+  }
+}
+
+export function deleteMatch(match: MatchModel) {
+  if (!match.reference)
+    return
+
+  try {
+    deleteDoc(match.reference)
+  }
+  catch (error) {
+    console.error(error)
+  }
+}
+
+export async function createMatch(match: MatchModel) {
+  try {
+    const ref = await addDoc(collectionMatches, match.toMap())
+    match.reference = ref
+
+    return match
+  }
+  catch (error) {
+    console.error(error)
+
+    return match
   }
 }
