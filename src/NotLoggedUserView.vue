@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import type { Timestamp } from 'firebase/firestore'
-import { mdiContentCopy, mdiDelete } from '@mdi/js'
+import { mdiContentCopy, mdiDelete, mdiListBoxOutline } from '@mdi/js'
 import {
   createMatch as firebaseCreateMatch,
   createTeam as firebaseCreateTeam,
@@ -16,6 +16,7 @@ import type { TeamModel } from './models/team'
 import router from './router'
 import CreateMatch from './CreateMatch.vue'
 import CreateTeam from './CreateTeam.vue'
+import Players from './Players.vue'
 
 const matches = ref<MatchModel[]>([])
 const teams = ref<TeamModel[]>([])
@@ -24,6 +25,7 @@ const isShowCreateMatchDialog = ref(false)
 const isShowCreateTeamDialog = ref(false)
 const selectedTab = ref('Mecze')
 const teamToEdit = ref<TeamModel | null>(null)
+const isShowPlayersDialog = ref(false)
 
 const statuses = [
   {
@@ -209,6 +211,11 @@ function updateTeam(team: TeamModel) {
 
   teamToEdit.value = null
 }
+
+function showPlayers(team: TeamModel | null) {
+  isShowPlayersDialog.value = !isShowPlayersDialog.value
+  teamToEdit.value = team
+}
 </script>
 
 <template>
@@ -312,6 +319,12 @@ function updateTeam(team: TeamModel) {
 
         <template #append>
           <v-btn
+            :icon="mdiListBoxOutline"
+            variant="flat"
+            @click.stop="showPlayers(team)"
+          />
+
+          <v-btn
             :icon="mdiDelete"
             variant="flat"
             @click.stop="deleteTeam(team)"
@@ -337,5 +350,11 @@ function updateTeam(team: TeamModel) {
     :team="teamToEdit"
     @save="createNewTeam"
     @update="updateTeam"
+  />
+
+  <Players
+    :is-show="isShowPlayersDialog"
+    :team="teamToEdit"
+    @close="showPlayers(null)"
   />
 </template>

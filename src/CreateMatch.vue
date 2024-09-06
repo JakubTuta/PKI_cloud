@@ -20,6 +20,10 @@ const isShow = defineModel<boolean>('isShow', { default: false })
 
 const selectedDate = ref(new Date())
 const selectedTime = ref<any>(null)
+const setsToWin = ref(3)
+const pointsToWin = ref(25)
+const isLastSetTieBreak = ref(true)
+const pointsToWinTieBreak = ref(15)
 const selectedTeamA = ref<{ title: string, value: TeamModel } | null>(null)
 const selectedTeamB = ref<{ title: string, value: TeamModel } | null>(null)
 
@@ -89,11 +93,17 @@ function createMatchModel() {
     teamA: selectedTeamA.value!.value.reference!,
     teamB: selectedTeamB.value!.value.reference!,
     result: '0:0',
+    status: getStatus(date),
     resultDetailed: {
       resD: [],
       timeout: [],
     },
-    status: getStatus(date),
+    matchSettings: {
+      sets: setsToWin.value,
+      pointsToWinSet: pointsToWin.value,
+      pointsToWinTiebreak: pointsToWinTieBreak.value,
+      isLastTiebreak: isLastSetTieBreak.value,
+    },
   }, null)
 }
 
@@ -161,6 +171,40 @@ function allowedMinutes(minute: number) {
               return-object
               :items="teamItems"
               class="my-2"
+            />
+          </v-col>
+        </v-row>
+
+        <v-row>
+          <v-col cols="12">
+            Ustawienia meczu
+          </v-col>
+
+          <v-col cols="6">
+            <v-text-field
+              v-model="setsToWin"
+              label="Ilość setów do wygrania"
+            />
+          </v-col>
+
+          <v-col cols="6">
+            <v-text-field
+              v-model="pointsToWin"
+              label="Ilość punktów do wygrania seta"
+            />
+          </v-col>
+
+          <v-col cols="6">
+            <v-text-field
+              v-model="pointsToWinTieBreak"
+              label="Ilość punktów do wygrania tie-break"
+            />
+          </v-col>
+
+          <v-col cols="6">
+            <v-checkbox
+              v-model="isLastSetTieBreak"
+              label="Czy ostatni set jest tie-breakiem"
             />
           </v-col>
         </v-row>

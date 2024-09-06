@@ -1,4 +1,5 @@
-import type { DocumentData, DocumentReference, Timestamp } from 'firebase/firestore'
+import type { DocumentData, DocumentReference } from 'firebase/firestore'
+import { Timestamp } from 'firebase/firestore'
 
 export type TStatus = 'planned' | 'in-progress' | 'finished'
 
@@ -11,6 +12,12 @@ export interface IMatch {
   resultDetailed: {
     resD: string[]
     timeout: string[]
+  }
+  matchSettings: {
+    sets: number
+    pointsToWinSet: number
+    isLastTiebreak: boolean
+    pointsToWinTiebreak: number
   }
 }
 
@@ -25,15 +32,28 @@ export class MatchModel implements IMatch {
     timeout: string[]
   }
 
+  matchSettings: {
+    sets: number
+    pointsToWinSet: number
+    isLastTiebreak: boolean
+    pointsToWinTiebreak: number
+  }
+
   reference: DocumentReference | null
 
   constructor(match: IMatch, reference: DocumentReference | null) {
-    this.date = match.date
-    this.teamA = match.teamA
-    this.teamB = match.teamB
-    this.result = match.result
-    this.resultDetailed = match.resultDetailed
-    this.status = match.status
+    this.date = match.date || Timestamp.now()
+    this.teamA = match.teamA || null
+    this.teamB = match.teamB || null
+    this.result = match.result || ''
+    this.resultDetailed = match.resultDetailed || { resD: [], timeout: [] }
+    this.status = match.status || 'planned'
+    this.matchSettings = match.matchSettings || {
+      sets: 3,
+      pointsToWinSet: 25,
+      isLastTiebreak: true,
+      pointsToWinTiebreak: 15,
+    }
 
     this.reference = reference
   }
@@ -46,6 +66,7 @@ export class MatchModel implements IMatch {
       result: this.result,
       resultDetailed: this.resultDetailed,
       status: this.status,
+      matchSettings: this.matchSettings,
     }
   }
 }

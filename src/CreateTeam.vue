@@ -18,10 +18,14 @@ const isShow = defineModel<boolean>('isShow', { default: false })
 const teamName = ref<string | null>(null)
 const playerNames = ref<string[]>([])
 
-watch(team, (newTeam, oldTeam) => {
-  if (newTeam && !oldTeam) {
+watch(team, (newTeam) => {
+  if (newTeam) {
     teamName.value = newTeam.name
     playerNames.value = newTeam.players
+  }
+  else {
+    teamName.value = null
+    playerNames.value = []
   }
 }, { immediate: true })
 
