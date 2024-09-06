@@ -40,7 +40,7 @@ const minTime = computed(() => {
 })
 
 const teamItems = computed(() => {
-  return teams.value.filter(team => team.reference.id !== selectedTeamA.value?.value.reference.id && team.reference.id !== selectedTeamB.value?.value.reference.id)
+  return teams.value.filter(team => team.reference?.id !== selectedTeamA.value?.value.reference?.id && team.reference?.id !== selectedTeamB.value?.value.reference?.id)
     .map(team => ({
       title: team.name,
       value: team,
@@ -86,8 +86,8 @@ function createMatchModel() {
 
   return new MatchModel({
     date: timestamp,
-    teamA: selectedTeamA.value!.value.reference,
-    teamB: selectedTeamB.value!.value.reference,
+    teamA: selectedTeamA.value!.value.reference!,
+    teamB: selectedTeamB.value!.value.reference!,
     result: '0:0',
     resultDetailed: {
       resD: [],
@@ -118,10 +118,6 @@ function allowedMinutes(minute: number) {
     max-width="800"
   >
     <v-card>
-      <v-btn @click="() => console.log(selectedTime)">
-        xdd
-      </v-btn>
-
       <v-card-title>
         Stwórz nowy mecz
       </v-card-title>

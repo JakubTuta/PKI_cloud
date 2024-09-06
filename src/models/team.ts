@@ -9,9 +9,9 @@ export class TeamModel implements ITeam {
   name: string
   players: string[]
 
-  reference: DocumentReference
+  reference: DocumentReference | null
 
-  constructor(data: ITeam, reference: DocumentReference) {
+  constructor(data: ITeam, reference: DocumentReference | null) {
     this.name = data.name
     this.players = data.players
 
@@ -26,6 +26,6 @@ export class TeamModel implements ITeam {
   }
 }
 
-export function createTeam(team: DocumentData) {
+export function mapTeam(team: DocumentData) {
   return new TeamModel(team.data() as ITeam, team.ref)
 }

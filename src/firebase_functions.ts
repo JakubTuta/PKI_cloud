@@ -1,11 +1,12 @@
 import { ref } from 'vue'
 import type { User } from 'firebase/auth'
 import { FacebookAuthProvider, GithubAuthProvider, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth'
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, orderBy, query } from 'firebase/firestore'
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, updateDoc } from 'firebase/firestore'
 import { auth, firestore } from './firebase'
 import type { MatchModel } from './models/match'
 import { mapMatch } from './models/match'
-import { createTeam } from './models/team'
+import type { TeamModel } from './models/team'
+import { mapTeam } from './models/team'
 
 export const user = ref<User | null>(null)
 
@@ -113,7 +114,7 @@ export async function getTeams() {
   try {
     const docs = await getDocs(teamsQuery)
 
-    const teams = docs.docs.map(createTeam)
+    const teams = docs.docs.map(mapTeam)
 
     return teams
   }
@@ -136,6 +137,18 @@ export function deleteMatch(match: MatchModel) {
   }
 }
 
+export function deleteTeam(team: TeamModel) {
+  if (!team.reference)
+    return
+
+  try {
+    deleteDoc(team.reference)
+  }
+  catch (error) {
+    console.error(error)
+  }
+}
+
 export async function createMatch(match: MatchModel) {
   try {
     const ref = await addDoc(collectionMatches, match.toMap())
@@ -147,5 +160,31 @@ export async function createMatch(match: MatchModel) {
     console.error(error)
 
     return match
+  }
+}
+
+export async function createTeam(team: TeamModel) {
+  try {
+    const ref = await addDoc(collectionTeams, team.toMap())
+    team.reference = ref
+
+    return team
+  }
+  catch (error) {
+    console.error(error)
+
+    return null
+  }
+}
+
+export function updateTeam(team: TeamModel) {
+  if (!team.reference)
+    return
+
+  try {
+    updateDoc(team.reference, team.toMap())
+  }
+  catch (error) {
+    console.error(error)
   }
 }
