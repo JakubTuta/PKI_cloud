@@ -13,7 +13,7 @@ const emit = defineEmits<{
 
 const { isShow, team } = toRefs(props)
 
-function close() {
+function onClose() {
   emit('close')
 }
 </script>
@@ -22,7 +22,7 @@ function close() {
   <v-dialog
     :model-value="isShow"
     max-width="600"
-    @update:model-value="close"
+    @update:model-value="onClose"
   >
     <v-card v-if="team">
       <v-card-title>
@@ -45,7 +45,7 @@ function close() {
       <v-card-actions>
         <v-btn
           text
-          @click="close"
+          @click="onClose"
         >
           Zamknij
         </v-btn>
