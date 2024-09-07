@@ -1,4 +1,4 @@
-import type { DocumentData, DocumentReference, QuerySnapshot } from 'firebase/firestore'
+import type { DocumentData, DocumentReference } from 'firebase/firestore'
 
 export interface IUserData {
   email: string

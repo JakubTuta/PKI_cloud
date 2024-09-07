@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import type { User, UserCredential } from 'firebase/auth'
+import type { User } from 'firebase/auth'
 import { FacebookAuthProvider, GithubAuthProvider, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth'
 import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, updateDoc, where } from 'firebase/firestore'
 import { auth, firestore } from './firebase'
@@ -28,7 +28,9 @@ onAuthStateChanged(auth, (currentUser) => {
     getUserData(currentUser)
   }
 
-  else if (user.value && !currentUser) { reset() }
+  else if (user.value && !currentUser) {
+    reset()
+  }
 })
 
 async function getUserData(currentUser: User) {

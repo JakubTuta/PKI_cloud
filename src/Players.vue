@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { toRefs, watch } from 'vue'
+import { toRefs } from 'vue'
 import type { TeamModel } from './models/team'
 
 const props = defineProps<{

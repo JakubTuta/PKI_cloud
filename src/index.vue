@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { loginFacebook, loginGithub, loginGoogle, logout, user, userData } from './firebase_functions'
+import { loginFacebook, loginGithub, loginGoogle, logout, user } from './firebase_functions'
 import NotLoggedUserView from './NotLoggedUserView.vue'
 </script>
 
