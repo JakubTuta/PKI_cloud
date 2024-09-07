@@ -67,7 +67,7 @@ function checkData() {
 
 function formatDate() {
   const date = selectedDate.value
-  const [hour, minute] = selectedTime.value.split(':')
+  const [hour, minute] = selectedTime.value.split(':').map(Number)
 
   return new Date(date.getFullYear(), date.getMonth(), date.getDate(), hour, minute)
 }
