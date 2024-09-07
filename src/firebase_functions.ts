@@ -1,29 +1,66 @@
 import { ref } from 'vue'
-import type { User } from 'firebase/auth'
+import type { User, UserCredential } from 'firebase/auth'
 import { FacebookAuthProvider, GithubAuthProvider, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth'
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, updateDoc } from 'firebase/firestore'
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, updateDoc, where } from 'firebase/firestore'
 import { auth, firestore } from './firebase'
 import type { MatchModel } from './models/match'
 import { mapMatch } from './models/match'
 import type { TeamModel } from './models/team'
 import { mapTeam } from './models/team'
+import { UserData, mapUserData } from './userData'
 
 export const user = ref<User | null>(null)
+export const userData = ref<UserData | null>(null)
 
 const collectionMatches = collection(firestore, 'matches')
 const collectionTeams = collection(firestore, 'teams')
+const collectionUsers = collection(firestore, 'users')
 
 function reset() {
   user.value = null
+  userData.value = null
 }
 
 onAuthStateChanged(auth, (currentUser) => {
-  if (currentUser)
+  if (currentUser) {
     user.value = currentUser
 
-  else if (user.value && !currentUser)
-    reset()
+    getUserData(currentUser)
+  }
+
+  else if (user.value && !currentUser) { reset() }
 })
+
+async function getUserData(currentUser: User) {
+  const q = query(collectionUsers, where('email', '==', currentUser.email))
+
+  try {
+    const docs = await getDocs(q)
+
+    if (docs.empty)
+      createUser(currentUser)
+    else
+      userData.value = mapUserData(docs.docs[0])
+  }
+  catch (error) {
+    console.error(error)
+  }
+}
+
+async function createUser(currentUser: User) {
+  user.value = currentUser
+
+  try {
+    const model = new UserData({ email: currentUser.email || '', role: 'user' }, null)
+    const ref = await addDoc(collectionUsers, model.toMap())
+
+    model.reference = ref
+    userData.value = model
+  }
+  catch (error) {
+    console.error(error)
+  }
+}
 
 export function loginGoogle() {
   const provider = new GoogleAuthProvider()
@@ -183,6 +220,18 @@ export function updateTeam(team: TeamModel) {
 
   try {
     updateDoc(team.reference, team.toMap())
+  }
+  catch (error) {
+    console.error(error)
+  }
+}
+
+export function updateMatchStatus(match: MatchModel, status: string) {
+  if (!match.reference)
+    return
+
+  try {
+    updateDoc(match.reference, { status })
   }
   catch (error) {
     console.error(error)

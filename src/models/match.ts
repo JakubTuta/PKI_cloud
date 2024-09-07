@@ -19,6 +19,10 @@ export interface IMatch {
     isLastTiebreak: boolean
     pointsToWinTiebreak: number
   }
+  pauses: {
+    teamA: number
+    teamB: number
+  }
 }
 
 export class MatchModel implements IMatch {
@@ -39,6 +43,11 @@ export class MatchModel implements IMatch {
     pointsToWinTiebreak: number
   }
 
+  pauses: {
+    teamA: number
+    teamB: number
+  }
+
   reference: DocumentReference | null
 
   constructor(match: IMatch, reference: DocumentReference | null) {
@@ -54,6 +63,7 @@ export class MatchModel implements IMatch {
       isLastTiebreak: true,
       pointsToWinTiebreak: 15,
     }
+    this.pauses = match.pauses || { teamA: 2, teamB: 2 }
 
     this.reference = reference
   }

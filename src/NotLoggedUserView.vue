@@ -10,6 +10,7 @@ import {
   updateTeam as firebaseUpdateTeam,
   getMatches,
   getTeams,
+  userData,
 } from './firebase_functions'
 import type { MatchModel } from './models/match'
 import type { TeamModel } from './models/team'
@@ -48,6 +49,8 @@ onMounted(async () => {
   matches.value = await getMatches()
   teams.value = await getTeams()
 })
+
+const isAdmin = computed(() => userData.value?.role === 'admin')
 
 const currentMatches = computed(() => {
   if (!selectedStatus.value)
@@ -219,7 +222,10 @@ function showPlayers(team: TeamModel | null) {
 </script>
 
 <template>
-  <v-row class="mb-4">
+  <v-row
+    v-if="isAdmin"
+    class="mb-4"
+  >
     <v-col cols="4">
       <v-btn
         block
@@ -288,6 +294,7 @@ function showPlayers(team: TeamModel | null) {
           />
 
           <v-btn
+            v-if="isAdmin"
             variant="flat"
             :icon="mdiDelete"
             @click.stop="deleteMatch(match)"
@@ -311,12 +318,11 @@ function showPlayers(team: TeamModel | null) {
         v-for="team in teams"
         :key="team.reference!.id"
         class="my-2"
-        @click="toggleCreateTeamDialog(team)"
+        :title="team.name"
+        @click="isAdmin
+          ? toggleCreateTeamDialog(team)
+          : ''"
       >
-        <v-list-item-title>
-          {{ team.name }}
-        </v-list-item-title>
-
         <template #append>
           <v-btn
             :icon="mdiListBoxOutline"
@@ -325,6 +331,7 @@ function showPlayers(team: TeamModel | null) {
           />
 
           <v-btn
+            v-if="isAdmin"
             :icon="mdiDelete"
             variant="flat"
             @click.stop="deleteTeam(team)"

@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { loginFacebook, loginGithub, loginGoogle, logout, user } from './firebase_functions'
-import LoggedUserView from './LoggedUserView.vue'
+import { loginFacebook, loginGithub, loginGoogle, logout, user, userData } from './firebase_functions'
 import NotLoggedUserView from './NotLoggedUserView.vue'
 </script>
 
@@ -51,9 +50,7 @@ import NotLoggedUserView from './NotLoggedUserView.vue'
       </v-card-title>
 
       <v-card-text>
-        <LoggedUserView v-if="user" />
-
-        <NotLoggedUserView v-else />
+        <NotLoggedUserView />
       </v-card-text>
     </v-card>
   </v-container>
