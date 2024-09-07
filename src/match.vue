@@ -256,6 +256,8 @@ function newSet() {
 
   team1Points.value = 0
   team2Points.value = 0
+
+  swapTeams()
 }
 </script>
 

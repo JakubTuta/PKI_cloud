@@ -19,7 +19,7 @@ const { teams } = toRefs(props)
 const isShow = defineModel<boolean>('isShow', { default: false })
 
 const selectedDate = ref(new Date())
-const selectedTime = ref<any>(null)
+const selectedTime = ref<string>(`${new Date().getHours()}:${new Date().getMinutes() - (new Date().getMinutes() % 5)}`)
 const setsToWin = ref(3)
 const pointsToWin = ref(25)
 const isLastSetTieBreak = ref(true)
