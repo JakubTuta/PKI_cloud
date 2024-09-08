@@ -226,12 +226,13 @@ export function deleteTeam(team: TeamModel) {
   }
 }
 
-export async function createMatch(match: MatchModel) {
+export function createMatch(match: MatchModel) {
   try {
-    const ref = await addDoc(collectionMatches, match.toMap())
-    match.reference = ref
+    addDoc(collectionMatches, match.toMap())
+    // const ref = await addDoc(collectionMatches, match.toMap())
+    // match.reference = ref
 
-    return match
+    // return match
   }
   catch (error) {
     console.error(error)

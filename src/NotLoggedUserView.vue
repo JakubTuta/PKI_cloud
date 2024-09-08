@@ -183,11 +183,12 @@ function toggleCreateMatchDialog() {
   isShowCreateMatchDialog.value = !isShowCreateMatchDialog.value
 }
 
-async function createNewMatch(match: MatchModel) {
-  const matchWithRef = await firebaseCreateMatch(match)
+function createNewMatch(match: MatchModel) {
+  firebaseCreateMatch(match)
+  // const matchWithRef = await firebaseCreateMatch(match)
 
-  if (matchWithRef)
-    matches.value.push(matchWithRef)
+  // if (matchWithRef)
+  //   matches.value.push(matchWithRef)
 }
 
 function toggleCreateTeamDialog(team: TeamModel | null = null) {
