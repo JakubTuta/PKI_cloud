@@ -315,11 +315,16 @@ function updateMatchPoints(data: string, isNewSet: boolean = false) {
     newResultDetailed = [...match.value?.resultDetailed.resD || [], newPoints]
   }
   else {
-    newResultDetailed = [...match.value?.resultDetailed.resD || []]
-    newResultDetailed[newResultDetailed.length - 1] = newPoints
+    if (match.value?.resultDetailed.resD.length) {
+      newResultDetailed = [...match.value?.resultDetailed.resD || []]
+      newResultDetailed[newResultDetailed.length - 1] = newPoints
+    }
+    else {
+      newResultDetailed = [newPoints]
+    }
   }
 
-  firebaseUpdateMatchPoints(match.value!, newSets, newResultDetailed)
+  firebaseUpdateMatchPoints(newSets, newResultDetailed)
 }
 
 function newSet() {
@@ -455,7 +460,7 @@ function newSet() {
             </v-row>
 
             <v-row
-              v-if="isAdmin"
+              v-if="isAdmin && isMatchInProgress"
               justify="center"
             >
               <v-btn

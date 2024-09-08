@@ -139,11 +139,12 @@ export function getMatches() {
 
     matches.value.forEach((match) => {
       const now = new Date()
+      const nowMinusTwoHours = new Date(now.getTime() - 2 * 60 * 60 * 1000)
       const nowPlusTwoHours = new Date(now.getTime() + 2 * 60 * 60 * 1000)
 
-      if (match.date.toDate() < now && match.status !== 'finished')
+      if (match.date.toDate() < nowMinusTwoHours && match.status !== 'finished')
         matchesToFinish.push(match)
-      else if (match.date.toDate() > now && match.date.toDate() < nowPlusTwoHours && match.status !== 'in-progress')
+      else if (match.date.toDate() > nowMinusTwoHours && match.date.toDate() < now && match.status !== 'in-progress')
         matchesToInProgress.push(match)
       else if (match.date.toDate() > nowPlusTwoHours && match.status !== 'planned')
         matchesToPlanned.push(match)
@@ -189,10 +190,11 @@ export function getMatch(id: string) {
 
     const now = new Date()
     const nowPlusTwoHours = new Date(now.getTime() + 2 * 60 * 60 * 1000)
+    const nowMinusTwoHours = new Date(now.getTime() - 2 * 60 * 60 * 1000)
 
-    if (match.value.date.toDate() < now && match.value.status !== 'finished')
+    if (match.value.date.toDate() < nowMinusTwoHours && match.value.status !== 'finished')
       updateMatchStatus(match.value, 'finished')
-    else if (match.value.date.toDate() > now && match.value.date.toDate() < nowPlusTwoHours && match.value.status !== 'in-progress')
+    else if (match.value.date.toDate() > nowMinusTwoHours && match.value.date.toDate() < now && match.value.status !== 'in-progress')
       updateMatchStatus(match.value, 'in-progress')
     else if (match.value.date.toDate() > nowPlusTwoHours && match.value.status !== 'planned')
       updateMatchStatus(match.value, 'planned')
@@ -309,12 +311,14 @@ export function updateMatchStatus(match: MatchModel, status: string) {
   }
 }
 
-export function updateMatchPoints(match: MatchModel, newSets: string, newPoints: string[]) {
-  if (!match.reference)
+export function updateMatchPoints(newSets: string, newPoints: string[]) {
+  if (!match.value?.reference)
     return
 
   try {
-    updateDoc(match.reference, { result: newSets, resultDetailed: { resD: newPoints } })
+    match.value.result = newSets
+    match.value.resultDetailed = { resD: newPoints, timeout: [] }
+    updateDoc(match.value.reference, { result: newSets, resultDetailed: { resD: newPoints } })
   }
   catch (error) {
     console.error(error)
