@@ -16,6 +16,9 @@ export const userData = ref<UserData | null>(null)
 export const matches = ref<MatchModel[]>([])
 const unsubscribeMatches = ref<Unsubscribe | null>(null)
 
+export const match = ref<MatchModel | null>(null)
+const unsubscribeMatch = ref<Unsubscribe | null>(null)
+
 const collectionMatches = collection(firestore, 'matches')
 const collectionTeams = collection(firestore, 'teams')
 const collectionUsers = collection(firestore, 'users')
@@ -151,17 +154,35 @@ export function getMatches() {
   // }
 }
 
-export async function getMatch(id: string) {
-  try {
-    const response = await getDoc(doc(collectionMatches, id))
+export function getMatch(id: string) {
+  if (!id) {
+    match.value = null
 
-    return mapMatch(response)
+    return
   }
-  catch (error) {
+
+  if (unsubscribeMatch.value)
+    unsubscribeMatch.value()
+
+  const onSuccess = (snapshot: any) => {
+    match.value = mapMatch(snapshot)
+  }
+
+  const onError = (error: any) => {
     console.error(error)
-
-    return null
   }
+
+  unsubscribeMatch.value = onSnapshot(doc(collectionMatches, id), onSuccess, onError)
+  // try {
+  //   const response = await getDoc(doc(collectionMatches, id))
+
+  //   return mapMatch(response)
+  // }
+  // catch (error) {
+  //   console.error(error)
+
+  //   return null
+  // }
 }
 
 export async function getTeams() {

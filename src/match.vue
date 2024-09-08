@@ -7,16 +7,15 @@ import {
   updateMatchStatus as firebaseUpdateMatchStatus,
   getMatch,
   getTeams,
+  match,
   userData,
 } from './firebase_functions'
-import type { MatchModel } from './models/match'
 import router from './router'
 import type { TeamModel } from './models/team'
 import Players from './Players.vue'
 
 const route = useRoute()
 
-const match = ref<MatchModel | null>(null)
 const teams = ref<TeamModel[]>([])
 const team1 = ref<TeamModel | null>(null)
 const team2 = ref<TeamModel | null>(null)
