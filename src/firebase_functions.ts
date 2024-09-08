@@ -1,7 +1,8 @@
 import { ref } from 'vue'
 import type { User } from 'firebase/auth'
 import { FacebookAuthProvider, GithubAuthProvider, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth'
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, updateDoc, where } from 'firebase/firestore'
+import type { Unsubscribe } from 'firebase/firestore'
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, onSnapshot, orderBy, query, updateDoc, where } from 'firebase/firestore'
 import { auth, firestore } from './firebase'
 import type { MatchModel } from './models/match'
 import { mapMatch } from './models/match'
@@ -11,6 +12,9 @@ import { UserData, mapUserData } from './userData'
 
 export const user = ref<User | null>(null)
 export const userData = ref<UserData | null>(null)
+
+export const matches = ref<MatchModel[]>([])
+const unsubscribeMatches = ref<Unsubscribe | null>(null)
 
 const collectionMatches = collection(firestore, 'matches')
 const collectionTeams = collection(firestore, 'teams')
@@ -117,21 +121,34 @@ export function logout() {
     .catch(onError)
 }
 
-export async function getMatches() {
+export function getMatches() {
   const matchesQuery = query(collectionMatches, orderBy('date', 'desc'))
 
-  try {
-    const docs = await getDocs(matchesQuery)
+  if (unsubscribeMatches.value)
+    unsubscribeMatches.value()
 
-    const matches = docs.docs.map(mapMatch)
-
-    return matches
+  const onSuccess = (snapshot: any) => {
+    matches.value = snapshot.docs.map(mapMatch)
   }
-  catch (error) {
+
+  const onError = (error: any) => {
     console.error(error)
-
-    return []
   }
+
+  unsubscribeMatches.value = onSnapshot(matchesQuery, onSuccess, onError)
+
+  // try {
+  //   const docs = await getDocs(matchesQuery)
+
+  //   const matches = docs.docs.map(mapMatch)
+
+  //   return matches
+  // }
+  // catch (error) {
+  //   console.error(error)
+
+  //   return []
+  // }
 }
 
 export async function getMatch(id: string) {
@@ -234,6 +251,18 @@ export function updateMatchStatus(match: MatchModel, status: string) {
 
   try {
     updateDoc(match.reference, { status })
+  }
+  catch (error) {
+    console.error(error)
+  }
+}
+
+export function updateMatchPoints(match: MatchModel, newSets: string, newPoints: string[]) {
+  if (!match.reference)
+    return
+
+  try {
+    updateDoc(match.reference, { result: newSets, resultDetailed: { resD: newPoints } })
   }
   catch (error) {
     console.error(error)

@@ -15,15 +15,15 @@ async def echo(websocket):
         room_id = message
 
         if room_id not in clients_per_room:
-            clients_per_room[room_id] = [ip_address]
+            clients_per_room[room_id] = [(ip_address, websocket)]
         else:
-            clients_per_room[room_id].append(ip_address)
+            clients_per_room[room_id].append((ip_address, websocket))
 
-        # message format "sets_team_1:sets_team_2:points_team_1:points_team_2"
+        # # message format "sets_team_1:sets_team_2:points_team_1:points_team_2"
         async for message in websocket:
-            for client in clients_per_room[room_id]:
+            for client, socket in clients_per_room[room_id]:
                 if client != ip_address:
-                    await websocket.send(message)
+                    await socket.send(message)
     finally:
         print("Client disconnected")
 

@@ -2,7 +2,13 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { mdiListBoxOutline, mdiMinus, mdiPlus, mdiSwapHorizontal } from '@mdi/js'
-import { updateMatchStatus as firebaseUpdateMatchStatus, getMatch, getTeams, userData } from './firebase_functions'
+import {
+  updateMatchPoints as firebaseUpdateMatchPoints,
+  updateMatchStatus as firebaseUpdateMatchStatus,
+  getMatch,
+  getTeams,
+  userData,
+} from './firebase_functions'
 import type { MatchModel } from './models/match'
 import router from './router'
 import type { TeamModel } from './models/team'
@@ -208,8 +214,10 @@ function addPoint(team: TeamModel | null) {
 
   const message = prepareMessageForWebsocket()
 
-  if (message)
+  if (message) {
     socket.send(message)
+    updateMatchPoints(message)
+  }
 }
 
 function removePoint(team: TeamModel | null) {
@@ -223,8 +231,10 @@ function removePoint(team: TeamModel | null) {
 
   const message = prepareMessageForWebsocket()
 
-  if (message)
+  if (message) {
     socket.send(message)
+    updateMatchPoints(message)
+  }
 }
 
 function mapDate() {
@@ -295,6 +305,24 @@ const canEndMatch = computed(() => {
     return setsTeam2.value + 1 >= match.value.matchSettings.sets
 })
 
+function updateMatchPoints(data: string, isNewSet: boolean = false) {
+  const [setsTeam1, setsTeam2, pointsTeam1, pointsTeam2] = data.split(':').map(Number)
+
+  const newSets = `${setsTeam1}:${setsTeam2}`
+  const newPoints = `${pointsTeam1}:${pointsTeam2}`
+
+  let newResultDetailed = []
+  if (isNewSet) {
+    newResultDetailed = [...match.value?.resultDetailed.resD || [], newPoints]
+  }
+  else {
+    newResultDetailed = [...match.value?.resultDetailed.resD || []]
+    newResultDetailed[newResultDetailed.length - 1] = newPoints
+  }
+
+  firebaseUpdateMatchPoints(match.value!, newSets, newResultDetailed)
+}
+
 function newSet() {
   const whoWon = team1Points.value > team2Points.value
     ? 'team1'
@@ -312,8 +340,10 @@ function newSet() {
 
   const message = prepareMessageForWebsocket()
 
-  if (message)
+  if (message) {
     socket.send(message)
+    updateMatchPoints(message, true)
+  }
 }
 </script>
 

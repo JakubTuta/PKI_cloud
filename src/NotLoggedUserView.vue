@@ -10,6 +10,7 @@ import {
   updateTeam as firebaseUpdateTeam,
   getMatches,
   getTeams,
+  matches,
   userData,
 } from './firebase_functions'
 import type { MatchModel } from './models/match'
@@ -19,7 +20,6 @@ import CreateMatch from './CreateMatch.vue'
 import CreateTeam from './CreateTeam.vue'
 import Players from './Players.vue'
 
-const matches = ref<MatchModel[]>([])
 const teams = ref<TeamModel[]>([])
 const selectedStatus = ref<string | null>(null)
 const isShowCreateMatchDialog = ref(false)
@@ -46,7 +46,7 @@ const statuses = [
 const tabs = ['Mecze', 'Drużyny']
 
 onMounted(async () => {
-  matches.value = await getMatches()
+  getMatches()
   teams.value = await getTeams()
 })
 
@@ -54,7 +54,7 @@ const isAdmin = computed(() => userData.value?.role === 'admin')
 
 const currentMatches = computed(() => {
   if (!selectedStatus.value)
-    // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+
     return matches.value.sort((a, b) => b.date.seconds - a.date.seconds)
 
   return matches.value.filter(match => match.status === selectedStatus.value).sort((a, b) => b.date.seconds - a.date.seconds)
