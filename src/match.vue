@@ -23,6 +23,47 @@ const team2Points = ref(0)
 const teamToEdit = ref<TeamModel | null>(null)
 const isShowPlayersDialog = ref(false)
 
+const socket = new WebSocket('ws://localhost:8888')
+
+socket.onopen = () => {
+  console.log('Połączono z serwerem')
+  socket.send(String(route.params.id))
+}
+
+socket.onmessage = (event) => {
+  if (!match.value)
+    return
+  // message format: "sets_team_1:sets_team_2:points_team_1:points_team_2"
+  const data = event.data.split(':')
+
+  if (match.value.teamA.id === team1.value?.reference?.id) {
+    setsTeam1.value = Number.parseInt(data[0])
+    setsTeam2.value = Number.parseInt(data[1])
+    team1Points.value = Number.parseInt(data[2])
+    team2Points.value = Number.parseInt(data[3])
+  }
+  else {
+    setsTeam1.value = Number.parseInt(data[1])
+    setsTeam2.value = Number.parseInt(data[0])
+    team1Points.value = Number.parseInt(data[3])
+    team2Points.value = Number.parseInt(data[2])
+  }
+}
+
+socket.onclose = () => {
+  console.log('Rozłączono z serwerem')
+}
+
+function prepareMessageForWebsocket() {
+  if (!match.value)
+    return
+
+  if (match.value.teamA.id === team1.value?.reference?.id)
+    return `${setsTeam1.value}:${setsTeam2.value}:${team1Points.value}:${team2Points.value}`
+  else
+    return `${setsTeam2.value}:${setsTeam1.value}:${team2Points.value}:${team1Points.value}`
+}
+
 onMounted(async () => {
   const docId = String(route.params.id)
 
@@ -164,6 +205,11 @@ function addPoint(team: TeamModel | null) {
     team1Points.value++
   else
     team2Points.value++
+
+  const message = prepareMessageForWebsocket()
+
+  if (message)
+    socket.send(message)
 }
 
 function removePoint(team: TeamModel | null) {
@@ -174,6 +220,11 @@ function removePoint(team: TeamModel | null) {
     team1Points.value--
   else
     team2Points.value--
+
+  const message = prepareMessageForWebsocket()
+
+  if (message)
+    socket.send(message)
 }
 
 function mapDate() {
@@ -258,6 +309,11 @@ function newSet() {
   team2Points.value = 0
 
   swapTeams()
+
+  const message = prepareMessageForWebsocket()
+
+  if (message)
+    socket.send(message)
 }
 </script>
 
