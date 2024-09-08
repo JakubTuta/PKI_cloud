@@ -29,7 +29,7 @@ const team2Points = ref(0)
 const teamToEdit = ref<TeamModel | null>(null)
 const isShowPlayersDialog = ref(false)
 
-const socket = new WebSocket('ws://localhost:8888')
+const socket = new WebSocket('https://websocket-image-1088248617300.europe-central2.run.app')
 
 socket.onopen = () => {
   console.log('Połączono z serwerem')
