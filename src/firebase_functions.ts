@@ -132,6 +132,26 @@ export function getMatches() {
 
   const onSuccess = (snapshot: any) => {
     matches.value = snapshot.docs.map(mapMatch)
+
+    const matchesToFinish: MatchModel[] = []
+    const matchesToInProgress: MatchModel[] = []
+    const matchesToPlanned: MatchModel[] = []
+
+    matches.value.forEach((match) => {
+      const now = new Date()
+      const nowPlusTwoHours = new Date(now.getTime() + 2 * 60 * 60 * 1000)
+
+      if (match.date.toDate() < now && match.status !== 'finished')
+        matchesToFinish.push(match)
+      else if (match.date.toDate() > now && match.date.toDate() < nowPlusTwoHours && match.status !== 'in-progress')
+        matchesToInProgress.push(match)
+      else if (match.date.toDate() > nowPlusTwoHours && match.status !== 'planned')
+        matchesToPlanned.push(match)
+    })
+
+    matchesToFinish.forEach(match => updateMatchStatus(match, 'finished'))
+    matchesToInProgress.forEach(match => updateMatchStatus(match, 'in-progress'))
+    matchesToPlanned.forEach(match => updateMatchStatus(match, 'planned'))
   }
 
   const onError = (error: any) => {
@@ -166,6 +186,16 @@ export function getMatch(id: string) {
 
   const onSuccess = (snapshot: any) => {
     match.value = mapMatch(snapshot)
+
+    const now = new Date()
+    const nowPlusTwoHours = new Date(now.getTime() + 2 * 60 * 60 * 1000)
+
+    if (match.value.date.toDate() < now && match.value.status !== 'finished')
+      updateMatchStatus(match.value, 'finished')
+    else if (match.value.date.toDate() > now && match.value.date.toDate() < nowPlusTwoHours && match.value.status !== 'in-progress')
+      updateMatchStatus(match.value, 'in-progress')
+    else if (match.value.date.toDate() > nowPlusTwoHours && match.value.status !== 'planned')
+      updateMatchStatus(match.value, 'planned')
   }
 
   const onError = (error: any) => {
